@@ -1,0 +1,6 @@
+/.vscode
+/settings.cfg
+/venv/
+/src/test.py
+__pycache__
+SourceHanSansSC-Normal.otf
