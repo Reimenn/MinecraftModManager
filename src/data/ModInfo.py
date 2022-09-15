@@ -1,7 +1,9 @@
+from io import BytesIO
 import os
 import os.path as path
 import shutil
 import sys
+from typing import Union
 from webbrowser import get
 import zipfile
 import toml
@@ -19,7 +21,6 @@ _DEFAULT_VERSION = '未知版本'
 _DEFAULT_MC_VERSION = '不明 mc 版本'
 _DEFAULT_LOADER = '不明加载器'
 _DEFAULT_MOD_DESC = ''
-
 
 
 def _mf(zip_file: zipfile.ZipFile, var: dict[str, str]) -> dict[str, str]:
@@ -57,6 +58,8 @@ class Mod:
     authors: str = ""
     icon: bytes | None = None
     full_file_path: str = ''
+    inner_mod: list['Mod'] = dataclasses.field(default_factory=list)
+    parent: Union['Mod', None] = None
 
     def __post__init__(self):
         self.dependencis = []
@@ -79,7 +82,7 @@ class Mod:
                 return
 
         # 图标
-        
+
         self.icon = None
         icon_path = json_root.get('icon', None)
         try:
@@ -99,17 +102,27 @@ class Mod:
                     authors.append(name)
             else:
                 authors.append(i)
-        # 依赖设置
-        jars: list[dict] = json_root.get('jars', {})
-        jar_files: list[str] = []
-        for jar in jars:
-            jar_files.append(jar.get('file', ''))
-        jar_files_str: str = '\n\n\n'.join(jar_files)
 
-        for k, v in json_root.get('depends', {}).items():
-            if k in ['minecraft', 'fabricloader', 'java']:
+        # 内部 jar 文件
+        jars: list[str] = [jar.get('file', '')
+                           for jar in json_root.get('jars', [])]
+        for jar_file in jars:
+            if not jar_file:
                 continue
-            if k in jar_files_str:
+            inner_mod = Mod(file_name=jar_file)
+            inner_mod.loader = 'fabric'
+            inner_mod.parent = self
+            inner_zip = zipfile.ZipFile(
+                BytesIO(zip_file.open(jar_file).read()))
+            inner_mod.__from_fabric_jar(inner_zip)
+            self.inner_mod.append(inner_mod)
+
+        # 依赖设置
+        inner_mod_ids: list[str] = [mod.mod_id for mod in self.inner_mod]
+        for k, v in json_root.get('depends', {}).items():
+            if k in ['minecraft', 'fabricloader', 'java', 'fabric']:
+                continue
+            if k in inner_mod_ids:
                 continue
             self.dependencis.append(ModDepend(
                 mod_id=k,
@@ -150,13 +163,12 @@ class Mod:
         # 基础信息
         self.mod_id = quilt_loader_info.get('id', _DEFAULT_MOD_ID)
         self.version = quilt_loader_info.get('version', _DEFAULT_VERSION)
-        self.dependencis = [i.get('id') for i in quilt_loader_info.get('depends', [])
-                            if i.get('id', '')
-                            and not i.get('id', '').startswith('quilt')
-                            and i.get('id', '') != 'minecraft' and i.get('id', '') != 'java']
+
         # mc 版本
         self.mc_version = _DEFAULT_MC_VERSION
         for dep in quilt_loader_info.get('depends', []):
+            if isinstance(dep, str):
+                continue
             if dep.get('id', '') == 'minecraft':
                 self.mc_version = dep.get('versions', _DEFAULT_MC_VERSION)
                 break
@@ -171,6 +183,38 @@ class Mod:
         authors.extend(metadata.get('authors', []))
         self.authors = ', '.join(authors)
         self.homepage = metadata.get('contact', {}).get('homepage', '')
+
+        # 内部 jar
+        jar_files: list[str] = quilt_loader_info.get('jars', [])
+        for jar_file in jar_files:
+            if not jar_file:
+                continue
+            inner_jar = zipfile.ZipFile(
+                BytesIO(zip_file.open(jar_file).read()))
+            mod = Mod(file_name=jar_file)
+            mod.loader = 'quilt'
+            mod.__from_quilt_jar(inner_jar)
+            mod.parent = self
+            self.inner_mod.append(mod)
+
+        # 依赖
+        inner_mod_ids: list[str] = [mod.mod_id for mod in self.inner_mod]
+        depends: list[dict] = quilt_loader_info.get('depends', [])
+        for depend in depends:
+            if isinstance(depend, str):
+                depend_id = depend
+                version_range = '*'
+            else:
+                depend_id: str = depend.get('id', '')
+                version_range = depend.get('versions', '')
+            if depend_id in ['minecraft', 'java', 'quilt', 'quilt_loader']:
+                continue
+            if depend_id in inner_mod_ids:
+                continue
+            self.dependencis.append(ModDepend(
+                mod_id=depend_id,
+                mandatory=True,
+                version_range=version_range))
 
         # 图标
         icon: bytes | None = None
@@ -218,8 +262,6 @@ class Mod:
         self.homepage = toml_mods.get('displayURL', "")
         self.authors = toml_mods.get('authors', "")
         self.icon = icon
-        self.dependencis = [i for i in self.dependencis if i !=
-                            'minecraft' and i != 'forge']
 
         # 获取 mc 版本和依赖信息
         dependencies: list[dict] = toml_root.get(
@@ -237,7 +279,7 @@ class Mod:
             if depend.mod_id == 'minecraft':
                 self.mc_version = dep.get('versionRange', _DEFAULT_MC_VERSION)
                 continue
-            if depend.mod_id == 'forge':
+            if depend.mod_id in ['forge', 'java']:
                 continue
             self.dependencis.append(depend)
 
@@ -311,9 +353,11 @@ class Mod:
         Args:
             file_path (str): .jar 文件路径
         """
+
         result = Mod(file_name=os.path.basename(file_path))
         result.full_file_path = os.path.abspath(file_path)
         zip_file = zipfile.ZipFile(file_path)
+
         result.loader = get_mod_loader(zip_file)
         match result.loader:
             case 'forge':
@@ -365,3 +409,9 @@ def get_mod_loader(zip_file: zipfile.ZipFile) -> str:
     if is_forge:
         return 'forge'
     return 'other'
+
+
+if __name__ == '__main__':
+    mod = Mod.create(r'F:\Minecraft\mods\s\voicechat-quilt-1.19.2-2.3.8.jar')
+    for dep in mod.dependencis:
+        print(dep)

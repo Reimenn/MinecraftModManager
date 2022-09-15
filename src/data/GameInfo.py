@@ -1,10 +1,10 @@
 import dataclasses
-from faulthandler import is_enabled
 import json
 import os
 import os.path as path
 import shutil
-from typing import List, Callable
+from typing import Callable, List
+
 from data.ModInfo import Mod
 
 

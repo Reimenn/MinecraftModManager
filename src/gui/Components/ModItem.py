@@ -1,6 +1,3 @@
-from shutil import ignore_patterns
-from typing import Callable
-
 import dearpygui.dearpygui as dpg
 from data import Mod
 from data.Settings import settings

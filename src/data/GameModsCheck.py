@@ -1,4 +1,3 @@
-from faulthandler import is_enabled
 from typing import Callable
 from data.ModInfo import Mod
 from data.GameInfo import Game

@@ -156,7 +156,7 @@ class InstallModMenu(_base_menu):
             items = GamePage.get.game_list.show_items
             dpg.add_combo(items=items, width=self.width,
                           callback=self.on_selected_game,
-                          default_value=items[1])
+                          default_value='')
 
             self.version_ui = dpg.add_text()
             self.loader_ui = dpg.add_text()
