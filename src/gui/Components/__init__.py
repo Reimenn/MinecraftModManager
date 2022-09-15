@@ -9,6 +9,7 @@ tItem = int | str
 class ComponentBase(object):
     """组件基类
     """
+
     def __init__(self):
         self.ui: tItem = -1
         """组件在 dpg 中的 tag"""
@@ -27,6 +28,7 @@ class ComponentBase(object):
 
 class center_group:
     """水平居中对齐组件,需要用 with 语法在其中添加子控件"""
+
     def __init__(self, window: tItem | None = None, horizontal_spacing: int = -1):
         self.horizontal_spacing = horizontal_spacing
         self.window = window

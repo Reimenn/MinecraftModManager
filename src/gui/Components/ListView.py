@@ -1,6 +1,6 @@
 import dearpygui.dearpygui as dpg
 
-from gui.Components import ComponentBase
+from gui.components import ComponentBase
 
 
 class ListView(ComponentBase):

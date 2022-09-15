@@ -1,4 +1,4 @@
-from gui.Pages import PageBase
+from gui.pages import PageBase
 import dearpygui.dearpygui as dpg
 
 class DownloadPage(PageBase):

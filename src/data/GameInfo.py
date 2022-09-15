@@ -74,7 +74,7 @@ class Game:
         if mod_id is None:
             return False
         for mod in self.get_mods_or_load():
-            if mod.mod_id == mod_id:
+            if mod.included_mod_by_id(mod_id):
                 return True
         return False
 

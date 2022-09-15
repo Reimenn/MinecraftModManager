@@ -1,8 +1,8 @@
 import dearpygui.dearpygui as dpg
 
-from gui.Components.ModList import ModList
-from gui.Pages import PageBase
-from gui.Components.ModItem import ModItem
+from gui.components.ModList import ModList
+from gui.pages import PageBase
+from gui.components.ModItem import ModItem
 from data import Mod
 from data import ModManager
 

@@ -46,7 +46,6 @@ class ModDepend(object):
 @dataclasses.dataclass
 class Mod:
     file_name: str
-    """MOD 文件名"""
     name: str = _DEFAULT_NAME
     mod_id: str = _DEFAULT_MOD_ID
     version: str = _DEFAULT_VERSION
@@ -58,8 +57,10 @@ class Mod:
     authors: str = ""
     icon: bytes | None = None
     full_file_path: str = ''
-    inner_mod: list['Mod'] = dataclasses.field(default_factory=list)
+
     parent: Union['Mod', None] = None
+    child_mods: list['Mod'] = dataclasses.field(default_factory=list)
+    provide_mods_id: list[str] = dataclasses.field(default_factory=list)
 
     def __post__init__(self):
         self.dependencis = []
@@ -68,6 +69,16 @@ class Mod:
         """ 获取这个mod的可搜索内容，包含名字、文件名、id、描述。
         """
         return self.name + self.file_name + self.mod_id
+
+    def included_mod_by_id(self, mod_id: str) -> bool:
+        if self.mod_id == mod_id:
+            return True
+        if mod_id in self.provide_mods_id:
+            return True
+        for mod in self.child_mods:
+            if mod.included_mod_by_id(mod_id):
+                return True
+        return False
 
     def __from_fabric_jar(self, zip_file: zipfile.ZipFile) -> None:
         fabric_mod_json = zip_file.read(_FABRIC_MOD_INFO_FILE)
@@ -93,6 +104,11 @@ class Mod:
         except Exception as e:
             pass
 
+        # 信息填充
+        self.name = json_root.get('name', _DEFAULT_NAME)
+        self.mod_id = json_root.get('id', '')
+        self.version = json_root.get('version', '')
+
         # 作者
         temp = json_root.get('authors', [])
         authors = []
@@ -102,7 +118,6 @@ class Mod:
                     authors.append(name)
             else:
                 authors.append(i)
-
         # 内部 jar 文件
         jars: list[str] = [jar.get('file', '')
                            for jar in json_root.get('jars', [])]
@@ -115,14 +130,18 @@ class Mod:
             inner_zip = zipfile.ZipFile(
                 BytesIO(zip_file.open(jar_file).read()))
             inner_mod.__from_fabric_jar(inner_zip)
-            self.inner_mod.append(inner_mod)
+            self.child_mods.append(inner_mod)
+
+        # provides
+        provides: list[str] = json_root.get('provides', [])
+        for provide in provides:
+            self.provide_mods_id.append(str(provide))
 
         # 依赖设置
-        inner_mod_ids: list[str] = [mod.mod_id for mod in self.inner_mod]
         for k, v in json_root.get('depends', {}).items():
             if k in ['minecraft', 'fabricloader', 'java', 'fabric']:
                 continue
-            if k in inner_mod_ids:
+            if self.included_mod_by_id(k):
                 continue
             self.dependencis.append(ModDepend(
                 mod_id=k,
@@ -130,10 +149,6 @@ class Mod:
                 version_range=v
             ))
 
-        # 信息填充
-        self.name = json_root.get('name', _DEFAULT_NAME)
-        self.mod_id = json_root.get('id', '')
-        self.version = json_root.get('version', '')
         self.mc_version = json_root.get('depends', {}).get(
             'minecraft', _DEFAULT_MC_VERSION)
 
@@ -195,10 +210,9 @@ class Mod:
             mod.loader = 'quilt'
             mod.__from_quilt_jar(inner_jar)
             mod.parent = self
-            self.inner_mod.append(mod)
+            self.child_mods.append(mod)
 
         # 依赖
-        inner_mod_ids: list[str] = [mod.mod_id for mod in self.inner_mod]
         depends: list[dict] = quilt_loader_info.get('depends', [])
         for depend in depends:
             if isinstance(depend, str):
@@ -209,7 +223,7 @@ class Mod:
                 version_range = depend.get('versions', '')
             if depend_id in ['minecraft', 'java', 'quilt', 'quilt_loader']:
                 continue
-            if depend_id in inner_mod_ids:
+            if self.included_mod_by_id(depend_id):
                 continue
             self.dependencis.append(ModDepend(
                 mod_id=depend_id,
@@ -412,6 +426,13 @@ def get_mod_loader(zip_file: zipfile.ZipFile) -> str:
 
 
 if __name__ == '__main__':
-    mod = Mod.create(r'F:\Minecraft\mods\s\voicechat-quilt-1.19.2-2.3.8.jar')
+    mod = Mod.create(
+        r'F:\Minecraft\.minecraft\versions\1.18.2-Fabric 0.14.9\mods\Origins-1.18.2-1.4.1.jar')
+
+    print("依赖有这些：")
     for dep in mod.dependencis:
         print(dep)
+
+    print('内部mod有这些，不包含套娃mod')
+    for inner in mod.child_mods:
+        print(inner)

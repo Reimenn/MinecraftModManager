@@ -14,7 +14,7 @@ def registry():
         with dpg.theme_component(dpg.mvAll):
             dpg.add_theme_style(dpg.mvStyleVar_CellPadding, 0, 0)
             dpg.add_theme_style(dpg.mvStyleVar_ScrollbarSize,
-                                20 * settings.global_size)
+                                settings.get_size(20))
 
     with dpg.theme(tag='zero'):
         with dpg.theme_component():

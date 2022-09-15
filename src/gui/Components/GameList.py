@@ -4,7 +4,7 @@ from typing import Callable
 import dearpygui.dearpygui as dpg
 from data import ModManager
 from data.GameInfo import Game
-from gui.Components import ComponentBase
+from gui.components import ComponentBase
 from gui.Fonts import Fonts
 
 tUI = int | str

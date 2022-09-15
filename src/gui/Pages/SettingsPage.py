@@ -2,7 +2,7 @@ from logging.config import valid_ident
 
 import dearpygui.dearpygui as dpg
 from data.Settings import settings
-from gui.Pages import PageBase
+from gui.pages import PageBase
 
 
 class SettingsPage(PageBase):

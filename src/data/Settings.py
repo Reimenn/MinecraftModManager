@@ -41,9 +41,14 @@ class Settings:
                 res.__setattr__(key, value)
             return res
 
+    def get_size(self, number: int) -> int:
+        return int(number * self.global_size)
 
-SettingsFields: List[dataclasses.Field] = dataclasses.fields(Settings)  # type: ignore
-SettingsFieldsTypeMap: Dict[str, type] = {i.name: i.type for i in SettingsFields}
+
+SettingsFields: List[dataclasses.Field] = dataclasses.fields(
+    Settings)  # type: ignore
+SettingsFieldsTypeMap: Dict[str, type] = {
+    i.name: i.type for i in SettingsFields}
 
 _SETTINGS: 'Settings' = None  # type: ignore
 

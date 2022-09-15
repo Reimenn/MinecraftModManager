@@ -3,14 +3,15 @@ from typing import Callable
 import dearpygui.dearpygui as dpg
 from data import Mod
 from data.Settings import settings
-from gui.Components import ComponentBase
-from gui.Components.ListView import ListView
-from gui.Components.ModItem import ModItem
+from gui.components import ComponentBase
+from gui.components.ListView import ListView
+from gui.components.ModItem import ModItem
 
 
 class ModList(ComponentBase):
     """mod 列表组件, 包含加载器筛选器, 版本筛选器, 名称筛选器, 刷新按钮
     """
+
     def __init__(self,
                  show_reload_button: bool = True,
                  show_loader_filter: bool = True,
@@ -38,8 +39,9 @@ class ModList(ComponentBase):
         self.show_tools: bool = show_tools
         self.lv: ListView = None  # type: ignore
         self.loading = False
-        self.reload_button: int = -1
-        self.loading_indicator: int = -1
+        self.search_input_ui: int = 0
+        self.reload_button: int = 0
+        self.loading_indicator: int = 0
         self.mod_items: list[ModItem] = []
         self.on_create_mod_item = on_create_mod_item
         self.filter: dict[str, str | bool] = {
@@ -68,10 +70,15 @@ class ModList(ComponentBase):
                         dpg.add_spacer()
                     if self.show_version_filter:
                         dpg.add_input_text(
-                            hint="版本搜索", width=150, user_data='filter_version', callback=self.on_filter_change)
+                            hint="版本搜索", width=150,
+                            user_data='filter_version', callback=self.on_filter_change)
                     if self.show_name_filter:
-                        dpg.add_input_text(hint='关键字搜索', width=-int(150 * settings.global_size) if self.show_reload_button else -1,
-                                           user_data='filter_keyword', callback=self.on_filter_change)
+                        width = -1
+                        if self.show_reload_button:
+                            width = -settings.get_size(150)
+                        self.search_input_ui = dpg.add_input_text(
+                            hint='关键字搜索', width=width, user_data='filter_keyword',
+                            callback=self.on_filter_change)  # type: ignore
                     if self.show_reload_button:
                         self.reload_button = dpg.add_button(  # type: ignore
                             label="刷新", width=-1, callback=self.reload_callback)  # type: ignore

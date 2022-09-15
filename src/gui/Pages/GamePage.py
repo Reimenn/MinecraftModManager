@@ -1,12 +1,14 @@
 import dearpygui.dearpygui as dpg
+from data import GameModsCheck
 from data.Settings import settings
-from data import Game, ModManager
+from data.GameInfo import Game
 from data.ModInfo import Mod
-from gui.Components.GameList import GameList
-from gui.Components.ModItem import ModItem
-from gui.Components.ModList import ModList
+from gui.components.IssueMenu import IssueMenu
+from gui.components.GameList import GameList
+from gui.components.ModItem import ModItem
+from gui.components.ModList import ModList
 from gui.Fonts import Fonts
-from gui.Pages import PageBase
+from gui.pages import PageBase
 
 
 class GamePage(PageBase):
@@ -26,6 +28,7 @@ class GamePage(PageBase):
                                          show_version_filter=False,
                                          on_create_mod_item=self._on_create_mod_item)
         self.current_game: Game | None = None
+        self.issue_menu: IssueMenu = IssueMenu()
         GamePage.get = self
 
     def build_page(self):
@@ -38,6 +41,16 @@ class GamePage(PageBase):
                     self.game_list.setup()
                 with dpg.table_cell():
                     self.mod_list.setup()
+                    toolbar = dpg.get_item_parent(self.mod_list.reload_button)
+                    dpg.add_button(label="检查", width=settings.get_size(150),
+                                   parent=toolbar,  # type: ignore
+                                   before=self.mod_list.reload_button,
+                                   callback=self.on_click_check_button)
+                    dpg.set_item_width(self.mod_list.search_input_ui,
+                                       width=-settings.get_size(300))
+
+        self.issue_menu.setup()
+        self.issue_menu.hide()
 
     def _on_create_mod_item(self, item: ModItem):
         """对 mod 列表中的 ModItem 进行设置
@@ -95,6 +108,15 @@ class GamePage(PageBase):
                 self.mod_list.add(mod)
         else:
             self.reload_mods()
+
+    def on_click_check_button(self):
+        if self.current_game is None:
+            return
+        result = GameModsCheck.check_game(self.current_game)
+        for mod, issue in result.items():
+            print('>' * 20, mod)
+            for i in issue:
+                print(i.message)
 
     def on_change_game(self, game: Game):
         """改变选择的游戏时触发, 这会尝试刷新mod列表(调用 try_show_mods)

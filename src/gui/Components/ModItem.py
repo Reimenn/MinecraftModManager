@@ -2,7 +2,7 @@ import dearpygui.dearpygui as dpg
 from data import Mod
 from data.Settings import settings
 from gui import ImageCache
-from gui.Components import ComponentBase
+from gui.components import ComponentBase
 from gui.Fonts import get_big_font
 
 
@@ -18,7 +18,7 @@ class ModItem(ComponentBase):
         self.info_ui: int | str = -1
         self.desc_ui: int | str = -1
         self.mod = mod
-        self.height: int = int(180 * settings.global_size)
+        self.height: int = settings.get_size(180)
         self.table: int | str = -1
 
     def setup(self):

@@ -47,12 +47,11 @@ def check_one_mod_loader(game: Game, mod: Mod) -> ModCheckResult | None:
     if game.game_type in mod.loader:
         return None
     return ModCheckResult(
-        mod, game, f"错误的将{mod.loader}的mod安装到了{game.game_type}的游戏中"
+        mod, game, f"确定这是一个支持 {game.game_type} 的mod吗？"
     )
 
 
 def check_one_mod_depend(game: Game, mod: Mod) -> list[ModCheckResult]:
-
     result: list[ModCheckResult] = []
     for dep in mod.dependencis:
         if not dep.mandatory:
@@ -61,7 +60,9 @@ def check_one_mod_depend(game: Game, mod: Mod) -> list[ModCheckResult]:
             result.append(ModCheckResult(mod, game, f"缺少前置mod: {dep.mod_id}"))
             continue
 
-        dep_mod: Mod = game.get_mod_by_id(dep.mod_id)  # type: ignore
+        dep_mod = game.get_mod_by_id(dep.mod_id)
+        if dep_mod is None:
+            continue
         if not dep_mod.is_enabled():
             result.append(ModCheckResult(
                 mod, game, f"前置mod: {dep.mod_id} 没有开启"))
