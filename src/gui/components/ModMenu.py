@@ -2,7 +2,7 @@ from os import system
 from typing import Callable
 
 import dearpygui.dearpygui as dpg
-from data import Mod, ModManager
+from data import ModFile, ModManager
 from gui.components import ComponentBase
 
 
@@ -13,7 +13,7 @@ class ModMenu(ComponentBase):
     def __init__(self) -> None:
         super().__init__()
         self.width = 200
-        self.mod: Mod | None = None
+        self.mod: ModFile | None = None
         self.delete_click_count: int = 0
 
         self.mod_info_win_ui: str | int = 0
@@ -21,7 +21,7 @@ class ModMenu(ComponentBase):
         self.delete_btn_ui: str | int = 0
         self.to_local_btn_ui: str | int = 0
 
-        self.on_delete_mod: Callable[[Mod], None] | None = None
+        self.on_delete_mod: Callable[[ModFile], None] | None = None
 
     def setup(self, parent: int | str) -> None:
         dpg.push_container_stack(parent)
@@ -44,8 +44,8 @@ class ModMenu(ComponentBase):
         dpg.delete_item(temp)
         self.hide()
 
-    def show(self, mod: Mod, *,
-             on_delete_mod: Callable[[Mod], None] | None = None,
+    def show(self, mod: ModFile, *,
+             on_delete_mod: Callable[[ModFile], None] | None = None,
              show_delete_button: bool = True,
              show_to_local_button: bool = False):
         """显示Mod操作菜单

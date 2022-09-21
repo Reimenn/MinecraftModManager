@@ -1,7 +1,7 @@
 from typing import Callable
 
 import dearpygui.dearpygui as dpg
-from data import Mod
+from data import ModFile
 from data.Settings import settings
 from gui.components import ComponentBase
 from gui.components.ListView import ListView
@@ -109,7 +109,7 @@ class ModList(ComponentBase):
         self.mod_items.clear()
         self.set_loading(False)
 
-    def add(self, mod: Mod):
+    def add(self, mod: ModFile):
         """添加一个新mod
 
         Args:
@@ -126,7 +126,7 @@ class ModList(ComponentBase):
         self.mod_items.append(mi)
         self.lv.add(mi.ui)
 
-    def remove(self, mod: Mod):
+    def remove(self, mod: ModFile):
         """删除一个mod
         """
         remove_target = None
@@ -143,7 +143,7 @@ class ModList(ComponentBase):
         """
         self.filter[data.split('_')[1]] = value
         for i in self.lv.values:
-            mod: Mod = dpg.get_item_user_data(i)  # type: ignore
+            mod: ModFile = dpg.get_item_user_data(i)  # type: ignore
             show = False
 
             if self.filter['forge'] and 'forge' in mod.loader:

@@ -1,15 +1,15 @@
 from typing import Callable
-from data.ModInfo import Mod
+from data.ModInfo import ModFile
 from data.GameInfo import Game
 
 
 class ModCheckResult(object):
     def __init__(self,
-                 mod: Mod,
+                 mod: ModFile,
                  game: Game,
                  message: str,
                  ) -> None:
-        self.mod: Mod = mod
+        self.mod: ModFile = mod
         self.game: Game = game
         self.message: str = message
         self.action: Callable[['ModCheckResult'], None] | None = None
@@ -25,7 +25,7 @@ class ModCheckResult(object):
         return self.__str__()
 
 
-_tResults = dict[Mod, list[ModCheckResult]]
+_tResults = dict[ModFile, list[ModCheckResult]]
 
 
 def check_game(game: Game) -> _tResults:
@@ -43,7 +43,7 @@ def check_game(game: Game) -> _tResults:
     return result
 
 
-def check_one_mod_loader(game: Game, mod: Mod) -> ModCheckResult | None:
+def check_one_mod_loader(game: Game, mod: ModFile) -> ModCheckResult | None:
     if game.game_type in mod.loader:
         return None
     return ModCheckResult(
@@ -51,7 +51,7 @@ def check_one_mod_loader(game: Game, mod: Mod) -> ModCheckResult | None:
     )
 
 
-def check_one_mod_depend(game: Game, mod: Mod) -> list[ModCheckResult]:
+def check_one_mod_depend(game: Game, mod: ModFile) -> list[ModCheckResult]:
     result: list[ModCheckResult] = []
     for dep in mod.dependencis:
         if not dep.mandatory:

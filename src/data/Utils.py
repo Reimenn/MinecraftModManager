@@ -1,3 +1,13 @@
+from typing import Literal
+
+
+LoaderType = Literal[
+    'quilt',
+    'fabric',
+    'forge',
+    'other'
+]
+
 def version_cmp(v1: str, v2: str) -> int:
     """两个版本号互相做比较
     """

@@ -1,5 +1,5 @@
 import dearpygui.dearpygui as dpg
-from data import Mod
+from data import ModFile
 from data.Settings import settings
 from gui import ImageCache
 from gui.components import ComponentBase
@@ -10,7 +10,7 @@ class ModItem(ComponentBase):
     """mod 列表中展示的 mod 项目, 包含图标, 信息, 操作按钮
     """
 
-    def __init__(self, mod: Mod):
+    def __init__(self, mod: ModFile):
         super().__init__()
         self.main_button_ui: int | str = 0
         self.minor_button_ui: int | str = 0

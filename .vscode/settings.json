@@ -16,5 +16,6 @@
         "ui":true,
         "upx":true,
         "venv":true,
+        "linux-env":true,
     }
 }

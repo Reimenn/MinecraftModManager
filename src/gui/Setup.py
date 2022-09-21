@@ -16,7 +16,6 @@ def setup():
     dpg.show_viewport()
 
     dpg.set_global_font_scale(settings.global_size)
-
     while dpg.is_dearpygui_running():
         for watcher in watchers:
             watcher.check()

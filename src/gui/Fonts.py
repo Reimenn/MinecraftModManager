@@ -19,12 +19,14 @@ def __load():
             for i in chars:
                 dpg.add_font_chars([ord(i) for i in chars])
             Fonts.font_s = f  # type: ignore
-        with dpg.font('SourceHanSansSC-Normal.otf', 44) as f:
-            dpg.add_font_range_hint(dpg.mvFontRangeHint_Default)
-            dpg.add_font_range_hint(dpg.mvFontRangeHint_Chinese_Full)
-            for i in chars:
-                dpg.add_font_chars([ord(i) for i in chars])
             Fonts.font_b = f  # type: ignore
+        # 为了提高启动速度，放弃了更大一号的字体加载
+        # with dpg.font('SourceHanSansSC-Normal.otf', 44) as f:
+        #     dpg.add_font_range_hint(dpg.mvFontRangeHint_Default)
+        #     dpg.add_font_range_hint(dpg.mvFontRangeHint_Chinese_Full)
+        #     for i in chars:
+        #         dpg.add_font_chars([ord(i) for i in chars])
+        #     Fonts.font_b = f  # type: ignore
 
 
 def get_normal_font() -> int:

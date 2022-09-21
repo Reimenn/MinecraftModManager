@@ -3,16 +3,16 @@ from os.path import isdir, join
 
 from data.Settings import settings
 from data.GameInfo import Game
-from data.ModInfo import Mod
+from data.mod.ModFile import ModFile
 
 from typing import Callable
 
-ModInfoArray = list[Mod]
+ModInfoArray = list[ModFile]
 
 
 def load_mods(root_dir: str,
-              on_load_one: Callable[[Mod], None] | None = None,
-              on_load_over: Callable[[list[Mod]], None] | None = None,
+              on_load_one: Callable[[ModFile], None] | None = None,
+              on_load_over: Callable[[list[ModFile]], None] | None = None,
               ) -> ModInfoArray:
     """加载一个目录下的全部 jar 格式的 mod 文件并返回，包含两个加载中的回调。
     
@@ -39,7 +39,7 @@ def load_mods(root_dir: str,
             continue
 
         try:
-            mod = Mod.create(join(root_dir, mod_file_path))
+            mod = ModFile.create(join(root_dir, mod_file_path))
         except Exception:
             continue
         if on_load_one:
@@ -89,7 +89,7 @@ class ModManager:
     __mm: 'ModManager' = None  # type: ignore
 
     def __init__(self):
-        self.local_mods: list[Mod] = []
+        self.local_mods: list[ModFile] = []
         """仓库中的mod们"""
         self.games: list[Game] = []
         """游戏目录下的游戏们"""
@@ -100,7 +100,7 @@ class ModManager:
             ModManager.__mm = ModManager()
         return ModManager.__mm
 
-    def get_mods_or_load(self) -> list[Mod]:
+    def get_mods_or_load(self) -> list[ModFile]:
         """获取仓库中的mod，若没加载则自动加载。
         """
         if not self.local_mods:
@@ -115,9 +115,9 @@ class ModManager:
         return self.games
 
     def reload_local_mods(self,
-                          on_load_one: Callable[[Mod], None] | None = None,
+                          on_load_one: Callable[[ModFile], None] | None = None,
                           on_load_over: Callable[[
-                              list[Mod]], None] | None = None
+                              list[ModFile]], None] | None = None
                           ) -> None:
         """ 重新加载本地 mod 们
         """
@@ -139,7 +139,7 @@ class ModManager:
                                 on_load_one=on_load_one,
                                 on_load_over=on_load_over)
 
-    def add_mod(self, mod: Mod) -> Mod:
+    def add_mod(self, mod: ModFile) -> ModFile:
         """
         添加一个mod文件到本地mod文件存放目录，并返回新的mod
         Args:
@@ -165,6 +165,6 @@ __all__ = [
     'load_mods',
     'load_games',
     'Game',
-    'Mod',
+    'ModFile',
     'ModManager'
 ]

@@ -3,7 +3,7 @@ import dearpygui.dearpygui as dpg
 from gui.components.ModList import ModList
 from gui.pages import PageBase
 from gui.components.ModItem import ModItem
-from data import Mod
+from data import ModFile
 from data import ModManager
 
 
@@ -62,7 +62,7 @@ class LocalPage(PageBase):
         for mod in ModManager.get().local_mods:
             self.ml.add(mod)
 
-    def on_load_over(self, mods: list[Mod]):
+    def on_load_over(self, mods: list[ModFile]):
         self.set_loading(False)
 
     def on_mod_main_button_click(self, item: int | str, value, data: ModItem):
@@ -72,7 +72,7 @@ class LocalPage(PageBase):
     def on_mod_minor_button_click(self, item: int | str, value, data: ModItem):
         from gui.MainWindow import MainWindow
 
-        def _del_mod(mod: Mod):
+        def _del_mod(mod: ModFile):
             ModManager.get().local_mods.remove(mod)
             LocalPage.get.ml.remove(mod)
             mod.delete_file()

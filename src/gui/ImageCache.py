@@ -5,12 +5,12 @@ from io import BytesIO
 
 import dearpygui.dearpygui as dpg
 from PIL.Image import Resampling, Image, open as open_image
-from data import Mod
+from data import ModFile
 
-cache: dict[Mod, int | str] = {}
+cache: dict[ModFile, int | str] = {}
 
 
-def get(mod: Mod, height: int = 180) -> int | str:
+def get(mod: ModFile, height: int = 180) -> int | str:
     """获取某个 mod 的缩略图, 若已经缓存则直接返回, 否则生成
     """
     if mod not in cache:
@@ -29,7 +29,7 @@ def get(mod: Mod, height: int = 180) -> int | str:
     return cache[mod]
 
 
-def remove(mod: Mod | list[Mod]):
+def remove(mod: ModFile | list[ModFile]):
     """移除某些已经缓存好的mod缩略图,释放内存(其实也占不了多少地方)
     """
     if isinstance(mod, list):

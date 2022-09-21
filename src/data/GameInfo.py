@@ -5,7 +5,7 @@ import os.path as path
 import shutil
 from typing import Callable, List
 
-from data.ModInfo import Mod
+from data.mod.ModFile import ModFile
 
 
 class GameType(object):
@@ -29,11 +29,11 @@ class Game:
     """游戏类型，值为 GameType 类中的字段"""
     version: str = _DEFAULT_MC_VERSION
     """游戏版本"""
-    mod_list: list[Mod] | None = None
+    mod_list: list[ModFile] | None = None
     """mod 列表"""
 
-    def get_mods_or_load(self, on_load_one: Callable[[Mod], None] | None = None,
-                         on_load_over: Callable[[list[Mod]], None] | None = None) -> list[Mod]:
+    def get_mods_or_load(self, on_load_one: Callable[[ModFile], None] | None = None,
+                         on_load_over: Callable[[list[ModFile]], None] | None = None) -> list[ModFile]:
         """获取 mod 们，若还没有读取则自动读取
 
         Args:
@@ -49,8 +49,8 @@ class Game:
         assert self.mod_list
         return self.mod_list
 
-    def reload_mods(self, on_load_one: Callable[[Mod], None] | None = None,
-                    on_load_over: Callable[[list[Mod]], None] | None = None) -> None:
+    def reload_mods(self, on_load_one: Callable[[ModFile], None] | None = None,
+                    on_load_over: Callable[[list[ModFile]], None] | None = None) -> None:
         """重新加载 mod
 
         Args:
@@ -78,7 +78,7 @@ class Game:
                 return True
         return False
 
-    def get_mod_by_id(self, mod_id: str) -> Mod | None:
+    def get_mod_by_id(self, mod_id: str) -> ModFile | None:
         for mod in self.get_mods_or_load():
             if mod.mod_id == mod_id:
                 return mod
@@ -97,7 +97,7 @@ class Game:
                 return True
         return False
 
-    def add_mod(self, mod: Mod) -> None:
+    def add_mod(self, mod: ModFile) -> None:
         """添加一个 mod 到这个游戏，这会把 mod 文件复制进 mods 文件夹。
         若存在同名的 mod 则会自动添加数字前缀。
         Args:
@@ -113,9 +113,9 @@ class Game:
         shutil.copy(mod.full_file_path, new_file_path)
         if self.mod_list is None:
             return
-        self.mod_list.append(Mod.create(new_file_path))
+        self.mod_list.append(ModFile.create(new_file_path))
 
-    def remove_mod(self, mod: Mod) -> None:
+    def remove_mod(self, mod: ModFile) -> None:
         """删除 mod 和对应文件。
 
         Args:

@@ -1,7 +1,7 @@
 import dearpygui.dearpygui as dpg
 from data import ModManager
 from data.GameInfo import Game, GameType
-from data.ModInfo import Mod
+from data.ModInfo import ModFile
 from gui.components import ComponentBase
 from gui.pages.GamePage import GamePage
 
@@ -19,7 +19,7 @@ class InstallModMenu(ComponentBase):
         self.err_ui: int | str = 0
 
         self.selected_game: Game | None = None
-        self.mod: Mod | None = None
+        self.mod: ModFile | None = None
 
     def setup(self, parent: int | str) -> None:
         dpg.push_container_stack(parent)
@@ -80,6 +80,6 @@ class InstallModMenu(ComponentBase):
         except Exception as e:
             print(e)
 
-    def show(self, mod: Mod) -> None:
+    def show(self, mod: ModFile) -> None:
         self.mod = mod
         super().show()

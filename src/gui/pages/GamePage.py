@@ -2,7 +2,7 @@ import dearpygui.dearpygui as dpg
 from data import GameModsCheck
 from data.Settings import settings
 from data.GameInfo import Game
-from data.ModInfo import Mod
+from data.ModInfo import ModFile
 from gui.components.IssueMenu import IssueMenu
 from gui.components.GameList import GameList
 from gui.components.ModItem import ModItem
@@ -130,7 +130,7 @@ class GamePage(PageBase):
         self.current_game = None
         self.mod_list.clear()
 
-    def on_load_mod_over(self, mods: list[Mod]):
+    def on_load_mod_over(self, mods: list[ModFile]):
         self.set_loading(False)
 
     def on_mod_main_button_click(self, item: int | str, value, data: ModItem):
@@ -150,7 +150,7 @@ class GamePage(PageBase):
         """
         from gui.MainWindow import MainWindow
 
-        def _del_mod(mod: Mod):
+        def _del_mod(mod: ModFile):
             if not self.current_game:
                 return
             self.mod_list.remove(mod)
