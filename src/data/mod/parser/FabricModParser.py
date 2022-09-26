@@ -28,10 +28,9 @@ class FabricModParser(ModParserBase):
                     json_source.replace(b'\n', b' ')
                 )
             except Exception as e:
-                log.error(
-                    f"用 fabric 解析来自 {self.mod_file.full_file_path} 的 mod 失败，"
-                    f"无法在初始化时读取 JSON 文件：{e}")
-                self.error = True
+                self.raise_error(
+                    "无法在初始化时解析 JSON，因为 {e}"
+                )
 
     def get_authors(self) -> list[str]:
         if self.error:

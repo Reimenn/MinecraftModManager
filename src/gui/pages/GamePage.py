@@ -2,7 +2,7 @@ import dearpygui.dearpygui as dpg
 from data import GameModsCheck
 from data.Settings import settings
 from data.GameInfo import Game
-from data.ModInfo import ModFile
+from data.mod.ModFile import ModFile
 from gui.components.IssueMenu import IssueMenu
 from gui.components.GameList import GameList
 from gui.components.ModItem import ModItem
@@ -57,7 +57,7 @@ class GamePage(PageBase):
         """
         dpg.set_item_callback(item.main_button_ui,
                               self.on_mod_main_button_click)
-        if item.mod.is_enabled():
+        if item.mod.enabled:
             dpg.set_item_label(item.main_button_ui, Fonts.is_enabled_text)
         else:
             dpg.set_item_label(item.main_button_ui, Fonts.is_disabled_text)
@@ -137,11 +137,11 @@ class GamePage(PageBase):
         """当ModItem的主要按钮按下
         """
         mod = data.mod
-        if mod.is_enabled():
-            mod.disable()
+        if mod.enabled:
+            mod.enabled = False
             dpg.set_item_label(data.main_button_ui, Fonts.is_disabled_text)
         else:
-            mod.enable()
+            mod.enabled = True
             dpg.set_item_label(data.main_button_ui, Fonts.is_enabled_text)
         data.reshow_info()
 

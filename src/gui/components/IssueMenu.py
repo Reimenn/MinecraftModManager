@@ -1,6 +1,6 @@
 import dearpygui.dearpygui as dpg
 from data.GameModsCheck import ModCheckResult
-from data.ModInfo import ModFile
+from data.mod.ModFile import ModFile
 from gui.components import ComponentBase
 
 

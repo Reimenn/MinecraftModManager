@@ -10,6 +10,7 @@ if FUCK_IMPORT:
 MCMOD_SEARCH_URL: str = 'https://www.mcmod.cn/modlist.html'
 
 
+
 def parse_search_page(source: str):
     root: Tag = BeautifulSoup(source, 'html.parser')
     mod_blocks: list[Tag] = root.find_all('div', **{'class': 'modlist-block'})

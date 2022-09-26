@@ -70,17 +70,17 @@ class Game:
         Returns:
             bool: 是否存在这个 mod 
         """
-        
+
         if mod_id is None:
             return False
         for mod in self.get_mods_or_load():
-            if mod.included_mod_by_id(mod_id):
+            if mod.include_mod_by_id(mod_id):
                 return True
         return False
 
     def get_mod_by_id(self, mod_id: str) -> ModFile | None:
         for mod in self.get_mods_or_load():
-            if mod.mod_id == mod_id:
+            if mod_id in mod.get_ids():
                 return mod
 
     def has_mod_by_file(self, mod_file: str) -> bool:
@@ -93,7 +93,8 @@ class Game:
             bool: 是否存在 mod
         """
         for mod in self.get_mods_or_load():
-            if mod.file_name.lower() == mod_file.lower():
+            basename = os.path.basename(mod.full_file_path)
+            if basename.lower() == mod_file.lower():
                 return True
         return False
 
@@ -103,17 +104,16 @@ class Game:
         Args:
             mod (ModInfo): 要被添加的 mod
         """
-        new_file_path: str = path.join(
-            self.full_dir_path, 'mods', mod.file_name)
-        ind = 0
-        while path.exists(new_file_path):
-            ind += 1
-            new_file_path = path.join(
-                self.full_dir_path, 'mods', f'({ind})' + mod.file_name)
-        shutil.copy(mod.full_file_path, new_file_path)
         if self.mod_list is None:
-            return
-        self.mod_list.append(ModFile.create(new_file_path))
+            self.reload_mods()
+        basename = os.path.basename(mod.full_file_path)
+        new_file_path: str = path.join(
+            self.full_dir_path, 'mods', basename)
+        mod = mod.copy_to(
+            path.join(self.full_dir_path, 'mods', basename)
+        )
+        assert self.mod_list
+        self.mod_list.append(mod)
 
     def remove_mod(self, mod: ModFile) -> None:
         """删除 mod 和对应文件。

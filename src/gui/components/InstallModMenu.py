@@ -1,7 +1,7 @@
 import dearpygui.dearpygui as dpg
 from data import ModManager
 from data.GameInfo import Game, GameType
-from data.ModInfo import ModFile
+from data.mod.ModFile import ModFile
 from gui.components import ComponentBase
 from gui.pages.GamePage import GamePage
 

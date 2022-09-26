@@ -1,6 +1,6 @@
-/settings.cfg
 /venv/
-/linux-env/
-/src/test.py
+/linux-venv/
+
+/settings.cfg
+
 __pycache__
-SourceHanSansSC-Normal.otf

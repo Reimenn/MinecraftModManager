@@ -1,3 +1,4 @@
+import os
 import dearpygui.dearpygui as dpg
 from data import ModFile
 from data.Settings import settings
@@ -31,7 +32,7 @@ class ModItem(ComponentBase):
 
     def __setup_icon(self):
         with dpg.child_window(height=self.height, width=self.height, border=False):
-            if self.mod.icon:
+            if self.mod.get_icon():
                 img = ImageCache.get(self.mod, self.height)
                 with dpg.drawlist(width=self.height, height=self.height):
                     dpg.draw_image(img, (0, 0), (self.height, self.height))
@@ -67,9 +68,17 @@ class ModItem(ComponentBase):
     def reshow_info(self):
         """刷新控件上显示的mod名字, 文件名, 描述信息
         """
-        dpg.set_value(self.title_ui, self.mod.name)
+        dpg.set_value(self.title_ui, '|'.join(self.mod.get_names()))
+
+        infos = []
+        des = ''
+        for info in self.mod.mod_info:
+            infos.append(
+                f"API:{info.loader}   VER:{info.version}   MC:{info.mc_version}")
+            if len(info.description) > len(des):
+                des = info.description
+
         dpg.set_value(self.info_ui,
-                      f"{self.mod.loader} | {self.mod.mc_version}\n"
-                      f"来自文件：{self.mod.file_name} | mod版本：{self.mod.version}")
+                      "\n".join(infos) + '\n' + f"来自文件：{os.path.basename(self.mod.full_file_path)}")
         dpg.set_value(self.desc_ui,
-                      self.mod.description.replace('\n', '\t'))
+                      des.replace('\n', '\t'))

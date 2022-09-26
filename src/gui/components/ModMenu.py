@@ -1,4 +1,4 @@
-from os import system
+from os import link, system
 from typing import Callable
 
 import dearpygui.dearpygui as dpg
@@ -60,7 +60,11 @@ class ModMenu(ComponentBase):
         self.on_delete_mod = on_delete_mod
         self.delete_click_count = 0
         dpg.set_item_label(self.delete_btn_ui, '删除')
-        dpg.configure_item(self.to_homepage_btn_ui, show=bool(mod.homepage))
+
+        links = {}
+        for info in mod.mod_info:
+            links.update(info.links)
+        dpg.configure_item(self.to_homepage_btn_ui, show='homepage' in links)
         dpg.configure_item(self.to_local_btn_ui, show=show_to_local_button)
         dpg.configure_item(self.delete_btn_ui, show=show_delete_button)
         super().show()
@@ -72,45 +76,62 @@ class ModMenu(ComponentBase):
         if self.mod_info_win_ui:
             dpg.delete_item(self.mod_info_win_ui)
         self.hide()
-        with dpg.window(label="MOD 信息 - " + mod.name) as self.mod_info_win_ui:  # type: ignore
+        label = "MOD 信息 - " + '|'.join(mod.get_names())
+        with dpg.window(label=label) as self.mod_info_win_ui:  # type: ignore
             with dpg.table(header_row=False, resizable=True, reorderable=True):
                 dpg.add_table_column(init_width_or_weight=3)
                 dpg.add_table_column(init_width_or_weight=6)
 
+                row_start = ''
+
                 def row(left: str, right: str):
                     with dpg.table_row():
                         with dpg.table_cell():
-                            dpg.add_text(left)
+                            dpg.add_text(row_start + left)
                         with dpg.table_cell():
                             dpg.add_text(right)
 
-                row('名称', mod.name)
-                row('mod 描述', mod.description)
-                row('mod id', mod.mod_id)
-                for provid in mod.provide_mods_id:
-                    row('provid id', provid)
-                row('mod 版本', mod.version)
-                row('作者', mod.authors)
-                row('主页', mod.homepage)
-                row('文件路径', mod.full_file_path)
-                row('对应 mc 版本', mod.mc_version)
-                row('需要的 mod 加载器', mod.loader)
-                for dep in mod.dependencis:
-                    if dep.mandatory:
-                        row('必备前置 mod', dep.mod_id + ': ' + dep.version_range)
-                for dep in mod.dependencis:
-                    if not dep.mandatory:
-                        row('可选前置 mod', dep.mod_id + ': ' + dep.version_range)
-                for child in mod.child_mods:
-                    row('内部子 mod', child.name + ", " +
-                        child.mod_id + ": " + child.version)
+                row('文件路径', mod.get_full_path())
+
+                for info in mod.mod_info:
+                    row(f"在 {info.loader} 加载器中的信息：", '')
+                    row_start = '\t'
+                    row('名称', info.name)
+                    row('mod 描述', info.description)
+                    row('mod id', info.mod_id)
+                    for provide in info.provide_mods_id:
+                        row('provide id', provide)
+                    row('mod 版本', info.version)
+                    for k, v in info.links.items():
+                        row(f'外部链接 {k}', v)
+                    row('对应 mc 版本', info.mc_version)
+                    row('需要的 mod 加载器', info.loader)
+                    for dep in info.dependencies:
+                        if dep.mandatory:
+                            row('必备前置 mod', dep.mod_id +
+                                ': ' + dep.version_range)
+                    for dep in info.dependencies:
+                        if not dep.mandatory:
+                            row('可选前置 mod', dep.mod_id +
+                                ': ' + dep.version_range)
+                    for child in info.child_mods:
+                        row('内部子 mod', str(child.get_names()) +
+                            " id => " + str(child.get_ids()))
+                    row_start = ''
 
     def to_homepage(self):
-        if not self.mod or not self.mod.homepage:
+        if self.mod is None:
             return
+
+        link = None
+        for info in self.mod.mod_info:
+            links = list(info.links.values())
+            if links:
+                link = links[0]
         self.hide()
-        import webbrowser
-        webbrowser.open(self.mod.homepage)
+        if link:
+            import webbrowser
+            webbrowser.open(link)
 
     def rename(self):
         # TODO: mod 文件重命名

@@ -8,14 +8,13 @@
         "**/Thumbs.db": true,
         // 隐藏文件
         "**/__pycache__":true,
-        ".idea":true,
-        "build":true,
-        "dist":true,
-        "output":true,
-        "local_mods*":true,
-        "ui":true,
-        "upx":true,
         "venv":true,
-        "linux-env":true,
-    }
+        "linux-venv":true,
+    },
+    "cSpell.words": [
+        "dearpygui",
+        "fabricloader",
+        "fabricmc",
+        "minecraft"
+    ]
 }

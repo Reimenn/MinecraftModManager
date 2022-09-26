@@ -145,18 +145,18 @@ class ModList(ComponentBase):
         for i in self.lv.values:
             mod: ModFile = dpg.get_item_user_data(i)  # type: ignore
             show = False
-
-            if self.filter['forge'] and 'forge' in mod.loader:
+            if self.filter['forge'] and 'forge' in mod.support_loaders():
                 show = True
-            elif self.filter['fabric'] and 'fabric' in mod.loader:
+            elif self.filter['fabric'] and 'fabric' in mod.support_loaders():
                 show = True
-            elif self.filter['quilt'] and 'quilt' in mod.loader:
+            elif self.filter['quilt'] and 'quilt' in mod.support_loaders():
                 show = True
-            elif self.filter['other'] and 'forge' not in mod.loader and \
-                    'fabric' not in mod.loader and 'quilt' not in mod.loader:
+            elif self.filter['other'] and 'forge' not in mod.support_loaders() and \
+                    'fabric' not in mod.support_loaders() and 'quilt' not in mod.support_loaders():
                 show = True
             if self.filter['keyword']:
-                if self.filter['keyword'].lower() not in mod.get_search_text().lower():  # type: ignore
+                inp: str = self.filter['keyword']  # type: ignore
+                if mod.in_search(inp):
                     show = False
             if show:
                 dpg.show_item(i)

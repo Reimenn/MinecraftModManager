@@ -15,7 +15,7 @@ def load_mods(root_dir: str,
               on_load_over: Callable[[list[ModFile]], None] | None = None,
               ) -> ModInfoArray:
     """加载一个目录下的全部 jar 格式的 mod 文件并返回，包含两个加载中的回调。
-    
+
     Args:
         root_dir: mod 目录.
         on_load_one: 读取一个 mod 的回调.
@@ -42,9 +42,10 @@ def load_mods(root_dir: str,
             mod = ModFile.create(join(root_dir, mod_file_path))
         except Exception:
             continue
-        if on_load_one:
+        if on_load_one and mod:
             on_load_one(mod)
-        result.append(mod)
+        if mod:
+            result.append(mod)
 
     if on_load_over:
         on_load_over(result.copy())
@@ -56,12 +57,12 @@ def load_games(root_dir: str,
                on_load_over: Callable[[list[Game]], None] | None = None,
                ) -> list[Game]:
     """ 读取一个目录下的游戏版本们，支持两个回调
-    
+
     Args:
         root_dir: 游戏目录根目录.
         on_load_one: 读取一个游戏的回调.
         on_load_over: 读取完成时的回调.
-        
+
     Returns:
         list[GameInfo]: 游戏们
     """
@@ -72,7 +73,6 @@ def load_games(root_dir: str,
         return result
     versions_dir_list = listdir(root_dir)
     for version_dir in versions_dir_list:
-        # noinspection PyBroadException
         try:
             game = Game.create(join(root_dir, version_dir))
             if on_load_one:
@@ -150,8 +150,8 @@ class ModManager:
         if mod in self.local_mods:
             return mod
         new_mod = mod.copy_to(settings.local_mods_dir)
+        new_mod.enabled = True
         self.local_mods.append(new_mod)
-        new_mod.enable()
         return new_mod
 
 

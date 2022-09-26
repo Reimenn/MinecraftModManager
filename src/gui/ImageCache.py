@@ -14,8 +14,10 @@ def get(mod: ModFile, height: int = 180) -> int | str:
     """获取某个 mod 的缩略图, 若已经缓存则直接返回, 否则生成
     """
     if mod not in cache:
-        assert mod.icon
-        img: Image = open_image(BytesIO(mod.icon))
+        icon = mod.get_icon()
+        if not icon:
+            return 0
+        img: Image = open_image(BytesIO(icon))
         img = img.resize((height, height), Resampling.NEAREST)
         img.save('./___temp___.png')
 
